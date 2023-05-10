@@ -1,0 +1,219 @@
+{% extends 'chatapp/base.html' %} {% block content %}
+<div class="modal-content rounded-4 shadow" style="border: 1px solid white;">
+  
+  <h3 class="fw-bold mb-0" style="
+  text-align: center;
+  color: #ffffff;
+  border-radius: 15px 15px 0 0;
+      background: #252233;
+  ">  
+  Room Code :
+      </h3>
+  <h3 class="fw-bold " style="
+      text-align: center;
+      color: #ffffff;
+      border-bottom: 1px solid;
+      background: #252233;
+  ">  
+        {{group_name}}
+      </h3>
+
+  <div
+    class="modal-body px-2 py-2 pb-4 border-bottom-0 mb-2 overflow-y-auto"
+    id="logbox"
+    style=" border-radius: 10px 10px 0 0; height: 20em"
+  >
+    {% for chat in chats %} {% if chat.user.username != user_name %}
+    <div
+      style="
+        background-color: #ffffff99;
+        border: 1px solid #ffffff99;
+        border-radius: 0 15px 15px 15px;
+        color: #1e1c29;
+      "
+      class="px-2 d-flex flex-column justify-content-start mx-2 mb-2"
+    >
+       <div class="d-flex justify-content-between ">
+      <h6 class="fw-bold mb-0" style="text-align: left; padding-right: 1em;font-size: 12px;padding-top:3px;">
+        {{chat.user.username}}
+      </h6>
+      <p class="mb-0" style="overflow-wrap: anywhere;font-size: 12px; text-align:right;">
+        {{chat.timestamp}}
+      </p>
+    </div>
+      <p class="mb-0" style="overflow-wrap: anywhere; padding-right: 1em">
+        {{chat.content}}
+      </p>
+    </div>
+    
+    {% else %}
+  <div
+    class="px-2 d-flex flex-column justify-content-start mx-2 mb-2"
+    style="
+      border-radius: 15px 15px 0px;
+      background-color: rgba(0, 0, 0, 0.67);
+      color: rgba(255, 255, 255, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      "
+      >
+      <div class="d-flex justify-content-between flex-row-reverse">
+          <h6 class="fw-bold mb-0" style="text-align: right; padding-right: 1em; 
+          padding-top:3px; font-size: 12px;">
+              {{chat.user.username}}
+          </h6>
+          <p class="mb-0" style="overflow-wrap: anywhere; text-align:left;font-size: 12px;  padding-right: 1em">
+              {{chat.timestamp}}
+            </p>
+        </div>
+    <p class="mb-0" style="overflow-wrap: anywhere; padding-right: 1em">
+        {{chat.content}}
+    </p>
+  
+</div>
+{% endif %} {% endfor %}
+</div>
+<div
+class="modal-header p-0 pt-0 border-top-0"
+style="
+      border-radius: 0 0 10px 10px;
+      overflow-y: hidden;
+    "
+  >
+    <div class="d-flex justify-content-center w-100">
+      {% csrf_token %}
+      <input
+       type="text"
+        placeholder="write text here...."
+        name="Sendmsg"
+        id="textbox"
+        style="
+        background: #ffffffd3;
+        width:100%;
+        border:0;
+        "
+
+      />
+      <input
+        type="submit"
+        id="submit"
+        class="btn btn-outline-secondary"
+        style="color: white; border-radius: 0 0 5px 0"
+        value="➤"
+      />
+    </div>
+  </div>
+</div>
+{% endblock content%} {% block script%} {{group_name|json_script:"group_name" }}
+{{user_name|json_script:"user_name" }}
+{{privatechat|json_script:"privatechat" }}
+<script>
+     const group_name = JSON.parse( document.getElementById("group_name").textContent);
+     const user_name = JSON.parse( document.getElementById("user_name").textContent);
+     const privatechat = JSON.parse( document.getElementById("privatechat").textContent);
+     console.log(group_name)
+        {% comment %} document.getElementById("name").innerText = group_name; {% endcomment %}
+    var ws;
+    if (privatechat=='False')
+    ws = new WebSocket("ws://" + window.location.host + "/ws/asc/" + group_name + "/");
+    else
+    ws = new WebSocket("ws://" + window.location.host + "/ws/asc/prv/" + group_name + "/");
+    ws.addEventListener("open", () => {
+      console.log("websocket connection open....");
+    });
+
+    ws.addEventListener("close", (event) => {
+        console.log("websocket connection is closed ", event);
+      });
+
+      ws.addEventListener("error", (event) => {
+        console.log("connection error", event);
+      });
+
+    ws.addEventListener("message",  myfunc)
+
+      function getDate(){
+        // Create a new Date object with the current time
+const date = new Date();
+
+// Format the date as a string in the desired format
+const formattedDate = date.toLocaleString('en-US', { 
+  month: 'long', 
+  day: 'numeric', 
+  year: 'numeric',
+  hour: 'numeric', 
+  minute: 'numeric', 
+  hour12: true 
+});
+
+console.log(formattedDate); // Outputs something like: May 8, 2023, 10:05 p.m.
+return formattedDate
+      }
+
+
+
+  function myfunc(event) {
+  js_obj = JSON.parse(event.data);
+  var newDiv = document.createElement("div");
+  newDiv.classList.add("px-2", "d-flex", "flex-column", "justify-content-start", "mx-2", "mb-2");
+  var newDiv2 = document.createElement("div");
+  newDiv2.classList.add("d-flex", "justify-content-between");
+
+  var newH6 = document.createElement("h6");
+  newH6.classList.add( "fw-bold", "mb-0");
+  newH6.style.fontSize= '12px';
+  newH6.style.paddingTop='3px';
+  newH6.textContent = js_obj['username'];
+    var newp2 = document.createElement("p");
+    newp2.classList.add("mb-0");
+    newp2.style.overflowWrap = "anywhere";
+    newp2.style.fontSize = "12px";
+    newp2.style.textAlign = "right";
+    var timestamp = getDate();
+    newp2.textContent=timestamp;
+
+  var newP = document.createElement("p");
+  newP.classList.add( "mb-0");
+  newP.textContent = js_obj['msg'];
+  newP.style.overflowWrap='anywhere';
+  if (user_name!=js_obj['username'])
+  {
+      newH6.style.textAlign='left';
+      newH6.style.paddingLeft='1em';
+      newP.style.paddingLeft='1em';
+      newDiv.style.borderRadius = "0 15px 15px 15px";
+      newDiv.style.backgroundColor = "#ffffff99";
+      newDiv.style.color = "#1e1c29";
+      newDiv.style.border="1px solid black";
+      newDiv2.classList.add("flex-row-reverse");
+
+  }
+  else
+  {
+      newH6.style.textAlign='right';
+      newH6.style.paddingRight='1em';
+      newP.style.paddingRight='1em';
+      newDiv.style.borderRadius = " 15px 15px 0 15px";
+      newDiv.style.backgroundColor = 'rgba(0,0,0,67%)';
+      newDiv.style.color = "#ffffff99";
+      newDiv.style.border = "1px solid #ffffff99";
+  }
+  newDiv.appendChild(newDiv2);
+  newDiv2.appendChild(newp2);
+  newDiv2.appendChild(newH6);
+  newDiv.appendChild(newP);
+  document.querySelector('#logbox').appendChild(newDiv);
+      console.log("message recieved from server....", event.data);
+    }
+
+    document.getElementById("submit").onclick = function (event) {
+      const mesgInp = document.getElementById("textbox");
+      const mesg = mesgInp.value;
+      ws.send(
+        JSON.stringify({
+          msg: mesg,
+        })
+      );
+      mesgInp.value = "";
+    };
+</script>
+{% endblock script %}
