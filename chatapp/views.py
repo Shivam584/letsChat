@@ -7,6 +7,7 @@ from .forms import user_info_forms
 from django.contrib import messages
 from django.http import HttpResponse,HttpResponseRedirect
 from google.transliteration import transliterate_text
+import google.transliteration
 # Create your views here.
 def index(request):
     return render(request,'chatapp/index.html')
@@ -35,12 +36,42 @@ def chat(request,group_name):
             'Hey {username}! You have joined {group_name} Group'.format(username=username, group_name=group_name)
         )
 
-
+    options = {
+    'en': 'English',
+    'as': 'Assamese',
+    'bn': 'Bengali',
+    'gu': 'Gujarati',
+    'hi': 'Hindi',
+    'kn': 'Kannada',
+    'ml': 'Malayalam',
+    'mr': 'Marathi',
+    'ne': 'Nepali',
+    'or': 'Oriya',
+    'pa': 'Punjabi',
+    'sa': 'Sanskrit',
+    'si': 'Sinhala',
+    'ta': 'Tamil',
+    'te': 'Telugu',
+    'be': 'Belarusian',
+    'bg': 'Bulgarian',
+    'ru': 'Russian',
+    'sr': 'Serbian',
+    'uk': 'Ukrainian',
+    'ar': 'Arabic',
+    'fa': 'Persian',
+    'ur': 'Urdu',
+    'am': 'Amharic',
+    'el': 'Greek',
+    'he': 'Hebrew',
+    'ja': 'Japanese',
+    'th': 'Thai',
+    'ti': 'Tigrinya'
+    }
     chatobjs = Chat.objects.select_related('user').filter(group=groupobj)
     # for chat in  chatobjs:
      # chat.content= transliterate_text(chat.content, lang_code='hi')
         # print(result)
-    return render(request, 'chatapp/home.html', {'group_name': group_name,'user_name':user.username,'chats':chatobjs,'privatechat': private })
+    return render(request, 'chatapp/home.html', {'group_name': group_name,'user_name':user.username,'chats':chatobjs,'privatechat': private,'options': options })
 
 @login_required
 def group(request):

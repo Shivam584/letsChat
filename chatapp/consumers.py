@@ -61,8 +61,8 @@ class myChatAsync(AsyncConsumer):
             pyobj['username']=user.username
             grpobj= await sync_to_async(Grp.objects.get)(name=grp_name)
             chatobj=Chat(content=pyobj['msg'],group=grpobj,user=user)
-            # pyobj['msg']=transliterate_text(pyobj['msg'], lang_code='hi')
-            # print(pyobj['msg'])
+            pyobj['msg']=transliterate_text(pyobj['msg'], lang_code=pyobj['lang'])
+            print(pyobj['msg'])
             await sync_to_async(chatobj.save)()
             await self.channel_layer.group_send(grp_name,
                 {
@@ -135,9 +135,9 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
             pyobj = json.loads(text_data)
             print(pyobj)
             pyobj['username']=user.username
-
             grpobj= await sync_to_async(Grp.objects.get)(name=grp_name)
             chatobj=Chat(content=pyobj['msg'],group=grpobj,user=user)
+            pyobj['msg']=transliterate_text(pyobj['msg'], lang_code=pyobj['lang'])
             await sync_to_async(chatobj.save)()
             await self.channel_layer.group_send(grp_name,
                 {
