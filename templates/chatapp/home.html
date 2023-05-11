@@ -91,8 +91,15 @@ style="
         width:100%;
         border:0;
         "
-
       />
+<select name="lang" id="lang" style="
+    width: 22%;
+    font-size: .9rem;
+">
+  {% for key, value in options.items %}
+  <option value="{{key}}">{{value}}</option>
+  {% endfor %}
+</select>
       <input
         type="submit"
         id="submit"
@@ -111,7 +118,6 @@ style="
      const user_name = JSON.parse( document.getElementById("user_name").textContent);
      const privatechat = JSON.parse( document.getElementById("privatechat").textContent);
      console.log(group_name)
-        {% comment %} document.getElementById("name").innerText = group_name; {% endcomment %}
     var ws;
     if (privatechat=='False')
     ws = new WebSocket("ws://" + window.location.host + "/ws/asc/" + group_name + "/");
@@ -208,11 +214,17 @@ return formattedDate
     document.getElementById("submit").onclick = function (event) {
       const mesgInp = document.getElementById("textbox");
       const mesg = mesgInp.value;
-      ws.send(
-        JSON.stringify({
+      const langInp=document.getElementById("lang")
+      const lang=langInp.value
+      if (mesg!="")
+      {
+
+        ws.send(
+          JSON.stringify({
           msg: mesg,
-        })
-      );
+          lang: lang
+        }))
+    }
       mesgInp.value = "";
     };
 </script>
